@@ -64,13 +64,58 @@ class Driver extends AbstractSQLServerDriver
             $dsn .= ';Database=' .  $params['dbname'];
         }
 
-        if (isset($params['MultipleActiveResultSets'])) {
-            $dsn .= '; MultipleActiveResultSets=' . ($params['MultipleActiveResultSets'] ? 'true' : 'false');
+        foreach ($this->getDsnParams($params) as $dsnParamName => $dsnParamValue) {
+            $dsn .= ";$dsnParamName=" .  $dsnParamValue;
         }
 
         return $dsn;
     }
 
+    /**
+     * Returns present dsn params
+     *
+     * @param array $params
+     *
+     * @return array Present DSN params
+     */    
+    private function getDsnParams(array $params) {
+        $dsnParams = [];
+        $availableDsnParams = $this->getAvailableDsnParam();
+        $paramsLowercase = array_change_key_case($params);
+        foreach ($availableDsnParams as $availableDsnParamName) {
+            $availableDsnParamValue = $paramsLowercase[strtolower($availableDsnParamName)] ?? null;
+            if (isset($availableDsnParamValue)) {
+                $dsnParams[$availableDsnParamName] = $availableDsnParamValue;
+            }
+        }
+        return $dsnParams;
+    }
+    
+    /**
+     * Returns available DSN params for driver
+     *
+     * @return array Available DSN params
+     */        
+    private function getAvailableDsnParam() {
+        return [
+            'APP',
+            'ConnectionPooling',
+            'Encrypt',
+            'Failover_Partner',
+            'LoginTimeout',
+            'MultipleActiveResultSets',
+            'QuotedId',
+            'Server',
+            'TraceFile',
+            'TraceOn',
+            'TransactionIsolation',
+            'TrustServerCertificate',
+            'WSID',
+            'ApplicationIntent',
+            'MultiSubnetFailover'
+        ];
+    }
+    
     /**
      * {@inheritdoc}
      */
