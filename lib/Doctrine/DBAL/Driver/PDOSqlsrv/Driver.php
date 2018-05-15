@@ -20,9 +20,7 @@
 namespace Doctrine\DBAL\Driver\PDOSqlsrv;
 
 use Doctrine\DBAL\Driver\AbstractSQLServerDriver;
-use function array_change_key_case;
 use function sprintf;
-use function strtolower;
 
 /**
  * The PDO-based Sqlsrv driver.
@@ -67,60 +65,28 @@ class Driver extends AbstractSQLServerDriver
             $dsn .= ';Database=' . $params['dbname'];
         }
 
-        foreach ($this->getDsnParams($params) as $dsnParamName => $dsnParamValue) {
-            $dsn .= sprintf(';%s=%s', $dsnParamName, $dsnParamValue);
+        if (isset($params['connectionOptions'])) {
+            $dsn .= $this->getConnectionOptionsDsn($params['connectionOptions']);
         }
 
         return $dsn;
     }
 
     /**
-     * Returns present dsn params
+     * Converts a connection options array to the DSN
      *
-     * @param string[] $params
-     *
-     * @return string[] Present DSN params
+     * @param string[] $connectionOptions
+     * @return string
      */
-    private function getDsnParams(array $params)
+    private function getConnectionOptionsDsn(array $connectionOptions)
     {
-        $dsnParams          = [];
-        $availableDsnParams = $this->getAvailableDsnParam();
-        $paramsLowercase    = array_change_key_case($params);
+        $connectionOptionsDsn = '';
 
-        foreach ($availableDsnParams as $availableDsnParamName) {
-            $availableDsnParamValue = $paramsLowercase[strtolower($availableDsnParamName)] ?? null;
-            if (! isset($availableDsnParamValue)) {
-                continue;
-            }
-            $dsnParams[$availableDsnParamName] = $availableDsnParamValue;
+        foreach ($connectionOptions as $paramName => $paramValue) {
+            $connectionOptionsDsn .= sprintf(';%s=%s', $paramName, $paramValue);
         }
-        return $dsnParams;
-    }
 
-    /**
-     * Returns available DSN params for driver
-     *
-     * @return string[] Available DSN params
-     */
-    private function getAvailableDsnParam()
-    {
-        return [
-            'APP',
-            'ConnectionPooling',
-            'Encrypt',
-            'Failover_Partner',
-            'LoginTimeout',
-            'MultipleActiveResultSets',
-            'QuotedId',
-            'Server',
-            'TraceFile',
-            'TraceOn',
-            'TransactionIsolation',
-            'TrustServerCertificate',
-            'WSID',
-            'ApplicationIntent',
-            'MultiSubnetFailover',
-        ];
+        return $connectionOptionsDsn;
     }
 
     /**
