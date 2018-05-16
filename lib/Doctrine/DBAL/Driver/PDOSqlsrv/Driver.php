@@ -21,6 +21,7 @@ namespace Doctrine\DBAL\Driver\PDOSqlsrv;
 
 use Doctrine\DBAL\Driver\AbstractSQLServerDriver;
 use function sprintf;
+use function is_int;
 
 /**
  * The PDO-based Sqlsrv driver.
@@ -34,11 +35,13 @@ class Driver extends AbstractSQLServerDriver
      */
     public function connect(array $params, $username = null, $password = null, array $driverOptions = [])
     {
+        $splitedOptions = $this->splitOptions($driverOptions);
+
         return new Connection(
-            $this->_constructPdoDsn($params),
+            $this->_constructPdoDsn($params, $splitedOptions['connectionOptions']),
             $username,
             $password,
-            $driverOptions
+            $splitedOptions['driverOptions']
         );
     }
 
@@ -46,10 +49,11 @@ class Driver extends AbstractSQLServerDriver
      * Constructs the Sqlsrv PDO DSN.
      *
      * @param array $params
+     * @param string[] $connectionOptions
      *
      * @return string The DSN.
      */
-    private function _constructPdoDsn(array $params)
+    private function _constructPdoDsn(array $params, array $connectionOptions)
     {
         $dsn = 'sqlsrv:server=';
 
@@ -65,11 +69,36 @@ class Driver extends AbstractSQLServerDriver
             $dsn .= ';Database=' . $params['dbname'];
         }
 
-        if (isset($params['connectionOptions'])) {
-            $dsn .= $this->getConnectionOptionsDsn($params['connectionOptions']);
+        if (! empty($connectionOptions)) {
+            $dsn .= $this->getConnectionOptionsDsn($connectionOptions);
         }
 
         return $dsn;
+    }
+
+    /**
+     * Separates a connection options from a driver options
+     *
+     * @param array $options
+     * @return array
+     */
+    private function splitOptions(array $options)
+    {
+        $driverOptions     = [];
+        $connectionOptions = [];
+
+        foreach ($options as $optionKey => $optionValue) {
+            if (is_int($optionKey)) {
+                $driverOptions[$optionKey] = $optionValue;
+            } else {
+                $connectionOptions[$optionKey] = $optionValue;
+            }
+        }
+
+        return [
+            'driverOptions' => $driverOptions,
+            'connectionOptions' => $connectionOptions,
+        ];
     }
 
     /**
