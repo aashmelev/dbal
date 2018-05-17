@@ -20,8 +20,8 @@
 namespace Doctrine\DBAL\Driver\PDOSqlsrv;
 
 use Doctrine\DBAL\Driver\AbstractSQLServerDriver;
-use function sprintf;
 use function is_int;
+use function sprintf;
 
 /**
  * The PDO-based Sqlsrv driver.
@@ -35,13 +35,13 @@ class Driver extends AbstractSQLServerDriver
      */
     public function connect(array $params, $username = null, $password = null, array $driverOptions = [])
     {
-        $splitedOptions = $this->splitOptions($driverOptions);
+        [$driverOptions, $connectionOptions] = $this->splitOptions($driverOptions);
 
         return new Connection(
-            $this->_constructPdoDsn($params, $splitedOptions['connectionOptions']),
+            $this->_constructPdoDsn($params, $connectionOptions),
             $username,
             $password,
-            $splitedOptions['driverOptions']
+            $driverOptions
         );
     }
 
@@ -69,9 +69,11 @@ class Driver extends AbstractSQLServerDriver
             $dsn .= ';Database=' . $params['dbname'];
         }
 
-        if (! empty($connectionOptions)) {
-            $dsn .= $this->getConnectionOptionsDsn($connectionOptions);
+        if (isset($params['MultipleActiveResultSets'])) {
+            $dsn .= '; MultipleActiveResultSets=' . ($params['MultipleActiveResultSets'] ? 'true' : 'false');
         }
+
+        $dsn .= $this->getConnectionOptionsDsn($connectionOptions);
 
         return $dsn;
     }
@@ -79,10 +81,10 @@ class Driver extends AbstractSQLServerDriver
     /**
      * Separates a connection options from a driver options
      *
-     * @param array $options
-     * @return array
+     * @param mixed[] $options
+     * @return mixed[][]
      */
-    private function splitOptions(array $options)
+    private function splitOptions(array $options) : array
     {
         $driverOptions     = [];
         $connectionOptions = [];
@@ -95,19 +97,15 @@ class Driver extends AbstractSQLServerDriver
             }
         }
 
-        return [
-            'driverOptions' => $driverOptions,
-            'connectionOptions' => $connectionOptions,
-        ];
+        return [$driverOptions, $connectionOptions];
     }
 
     /**
      * Converts a connection options array to the DSN
      *
      * @param string[] $connectionOptions
-     * @return string
      */
-    private function getConnectionOptionsDsn(array $connectionOptions)
+    private function getConnectionOptionsDsn(array $connectionOptions) : string
     {
         $connectionOptionsDsn = '';
 
