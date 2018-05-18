@@ -66,11 +66,11 @@ class Driver extends AbstractSQLServerDriver
         }
 
         if (isset($params['dbname'])) {
-            $dsn .= ';Database=' . $params['dbname'];
+            $connectionOptions['Database'] = $params['dbname'];
         }
 
         if (isset($params['MultipleActiveResultSets'])) {
-            $dsn .= '; MultipleActiveResultSets=' . ($params['MultipleActiveResultSets'] ? 'true' : 'false');
+            $connectionOptions['MultipleActiveResultSets'] = $params['MultipleActiveResultSets'] ? 'true' : 'false';
         }
 
         $dsn .= $this->getConnectionOptionsDsn($connectionOptions);
