@@ -22,28 +22,19 @@ class DriverTest extends AbstractSQLServerDriverTest
     {
         $this->skipWhenNotUsingPdoSqlsrv();
 
-        $connection = $this->getConnection([
-            'APP' => 'APP_NAME',
-            'WSID' => 'WSID_NAME',
-        ]);
-
-        $result = $connection->query('select APP_NAME() as app,  HOST_NAME() as host')->fetch();
+        $connection = $this->getConnection(['APP' => 'APP_NAME']);
+        $result     = $connection->query('select APP_NAME() as app')->fetch();
 
         self::assertSame('APP_NAME', $result['app']);
-        self::assertSame('WSID_NAME', $result['host']);
     }
 
     public function testDriverOptions()
     {
         $this->skipWhenNotUsingPdoSqlsrv();
 
-        $connection = $this->getConnection([
-            PDO::ATTR_CASE => PDO::CASE_UPPER,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
+        $connection = $this->getConnection([PDO::ATTR_CASE => PDO::CASE_UPPER]);
 
         self::assertSame(PDO::CASE_UPPER, $connection->getAttribute(PDO::ATTR_CASE));
-        self::assertSame(PDO::FETCH_ASSOC, $connection->getAttribute(PDO::ATTR_DEFAULT_FETCH_MODE));
     }
 
     private function getConnection($driverOptions)
