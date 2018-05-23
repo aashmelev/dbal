@@ -3,6 +3,8 @@
 namespace Doctrine\Tests\DBAL\Driver;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver\AbstractSQLServerDriver;
+use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\Platforms\SQLServer2008Platform;
 use Doctrine\DBAL\Schema\SQLServerSchemaManager;
 
@@ -53,5 +55,41 @@ class AbstractSQLServerDriverTest extends AbstractDriverTest
             array('11.00.2101', 'Doctrine\DBAL\Platforms\SQLServer2012Platform'),
             array('12', 'Doctrine\DBAL\Platforms\SQLServer2012Platform'),
         );
+    }
+
+    protected function getDriver() : AbstractSQLServerDriver
+    {
+        return static::createDriver();
+    }
+
+    protected function checkForSkippingTest(AbstractSQLServerDriver $driver) : void
+    {
+        $this->markTestSkipped('The test is only for the sqlsrv and the pdo_sqlsrv drivers');
+    }
+
+    /**
+     * @param mixed[] $driverOptions
+     */
+    protected function getConnection(AbstractSQLServerDriver $driver, array $driverOptions) : DriverConnection
+    {
+        return $driver->connect(
+            [
+                'host' => $GLOBALS['db_host'],
+                'port' => $GLOBALS['db_port'],
+            ],
+            $GLOBALS['db_username'],
+            $GLOBALS['db_password'],
+            $driverOptions
+        );
+    }
+
+    public function testConnectionOptions() : void
+    {
+        $driver = $this->getDriver();
+        $this->checkForSkippingTest($driver);
+        $connection = $this->getConnection($driver, ['APP' => 'APP_NAME']);
+        $result     = $connection->query('select APP_NAME() as app')->fetch();
+
+        self::assertSame('APP_NAME', $result['app']);
     }
 }

@@ -1,9 +1,3 @@
-# Upgrade to 2.8
-
-## Doctrine\DBAL\Driver\PDOSqlsrv\Driver#connect
-
-Usage of the `MultipleActiveResultSets` parameter from the `DSN` in the `PDOSqlsrv` driver is deprecated, the `$driverOptions` parameter should be used.
-
 # Upgrade to 2.7
 
 ## Doctrine\DBAL\Platforms\AbstractPlatform::DATE_INTERVAL_UNIT_* constants deprecated
@@ -16,7 +10,7 @@ Usage of the `MultipleActiveResultSets` parameter from the `DSN` in the `PDOSqls
 
 ## Doctrine\DBAL\Connection::TRANSACTION_* constants deprecated
 
-``Doctrine\DBAL\Connection::TRANSACTION_*`` were moved into ``Doctrine\DBAL\TransactionIsolationLevel`` class without the ``TRANSACTION_`` prefix.
+``Doctrine\DBAL\Connection::TRANSACTION_*`` were moved into ``Doctrine\DBAL\TransactionIsolationLevel`` class without the ``TRANSACTION_`` prefix. 
 
 # Upgrade to 2.6
 
