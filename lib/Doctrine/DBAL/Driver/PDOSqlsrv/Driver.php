@@ -81,8 +81,8 @@ class Driver extends AbstractSQLServerDriver
     /**
      * Separates a connection options from a driver options
      *
-     * @param mixed[] $options
-     * @return mixed[][]
+     * @param int[]|string[] $options
+     * @return int[][]|string[][]
      */
     private function splitOptions(array $options) : array
     {
